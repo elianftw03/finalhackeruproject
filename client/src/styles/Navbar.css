@@ -1,0 +1,29 @@
+nav {
+  height: 60px;
+  background-color: #fefdf8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+}
+
+.nav-left img {
+  height: 90px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--text-color);
+  cursor: pointer;
+  margin-right: 1rem;
+}
+
+button {
+  height: 30px;
+}

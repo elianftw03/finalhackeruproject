@@ -122,6 +122,7 @@ body {
 
 .category-card:hover {
   transform: translateY(-5px);
+  cursor: pointer;
 }
 
 .category-card img {

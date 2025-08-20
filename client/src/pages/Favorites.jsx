@@ -1,39 +1,55 @@
 import { useEffect, useState } from "react";
 import axios from "../api/axiosInstance";
 import PetCard from "../components/PetCard";
-import { useAuth } from "../context/AuthContext";
 
-function Favorites() {
-  const [favorites, setFavorites] = useState([]);
-  const { user } = useAuth();
+export default function Favorites() {
+  const [pets, setPets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  async function load() {
+    try {
+      setLoading(true);
+      const res = await axios.get("/pets/favorites");
+      const data = Array.isArray(res.data)
+        ? res.data.map((p) => ({ ...p, _isFav: true }))
+        : [];
+      setPets(data);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        const res = await axios.get("/pets/favorites");
-        setFavorites(res.data);
-      } catch (err) {
-        console.error("Failed to fetch favorites");
-      }
-    };
+    load();
+  }, []);
 
-    if (user) fetchFavorites();
-  }, [user]);
+  function handleFavoriteChanged(id, isFav) {
+    if (!isFav) setPets((prev) => prev.filter((p) => p._id !== id));
+  }
 
-  if (!user) return <p>You must be logged in to view favorites.</p>;
+  if (loading) return <div style={{ padding: 16 }}>Loading...</div>;
+  if (!pets.length)
+    return <div style={{ padding: 16 }}>You have no favorite pets yet.</div>;
 
   return (
-    <div>
-      <h2>Your Favorite Pets</h2>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-        {favorites.length > 0 ? (
-          favorites.map((pet) => <PetCard key={pet._id} pet={pet} />)
-        ) : (
-          <p>You haven't favorited any pets yet.</p>
-        )}
+    <div style={{ padding: 16 }}>
+      <h2>My Favorites</h2>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
+          gap: "1rem",
+          marginTop: 12,
+        }}
+      >
+        {pets.map((pet) => (
+          <PetCard
+            key={pet._id}
+            pet={pet}
+            onFavoriteChanged={handleFavoriteChanged}
+          />
+        ))}
       </div>
     </div>
   );
 }
-
-export default Favorites;

@@ -11,6 +11,7 @@ import MyPets from "./pages/MyPets";
 import Favorites from "./pages/Favorites";
 import About from "./pages/About";
 import ProtectedRoute from "./components/ProtectedRoute";
+import BusinessDashboard from "./pages/BusinessDashboard";
 
 function App() {
   return (
@@ -43,6 +44,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["regular", "shelter", "admin"]}>
               <Favorites />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["shelter", "admin"]}>
+              <BusinessDashboard />
             </ProtectedRoute>
           }
         />

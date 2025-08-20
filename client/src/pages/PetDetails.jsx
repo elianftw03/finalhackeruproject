@@ -1,74 +1,76 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "../api/axiosInstance";
-import { useAuth } from "../context/AuthContext";
+import { useToast } from "../components/Toast";
+import "../styles/PetDetails.css";
 
-function PetDetails() {
+export default function PetDetails() {
   const { id } = useParams();
   const [pet, setPet] = useState(null);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const { user } = useAuth();
+  const role = (localStorage.getItem("role") || "").toLowerCase();
+  const { toast } = useToast();
 
   useEffect(() => {
-    const fetchPet = async () => {
-      try {
-        const res = await axios.get(`/pets/${id}`);
-        setPet(res.data);
-        if (user && user.favorites && user.favorites.includes(res.data._id)) {
-          setIsFavorite(true);
-        }
-      } catch (err) {
-        console.error("Failed to fetch pet details");
-      }
+    const run = async () => {
+      const { data } = await axios.get(`/pets/${id}`);
+      setPet(data);
     };
-    fetchPet();
-  }, [id, user]);
+    run();
+  }, [id]);
 
   const toggleFavorite = async () => {
     try {
-      await axios.patch(`/pets/${pet._id}/favorite`);
-    } catch (err) {
-      console.error(
-        "❌ Failed to toggle favorite:",
-        err.response?.data || err.message
-      );
+      await axios.patch(`/pets/${id}/favorite`);
+      toast("Updated favorites");
+    } catch {
+      toast("Failed to update favorites", "err");
     }
   };
 
-  if (!pet) return <p>Loading...</p>;
+  if (!pet) return <div className="details-wrap">Loading...</div>;
 
   return (
-    <div>
-      <h2>{pet.name}</h2>
-      <img src={pet.image} alt={pet.name} style={{ maxWidth: "400px" }} />
-      <p>
-        <strong>Type:</strong> {pet.type}
-      </p>
-      <p>
-        <strong>Age:</strong> {pet.age}
-      </p>
-      <p>
-        <strong>Breed:</strong> {pet.breed}
-      </p>
-      <p>
-        <strong>Description:</strong> {pet.description}
-      </p>
-      <p>
-        <strong>Shelter: </strong>
-        {pet.createdBy?.name || "Unknown"}
-      </p>
-      <p>
-        <strong>Location: </strong>
-        {pet.createdBy?.location || "Not Specified"}
-      </p>
+    <div className="details-wrap">
+      <div className="details-grid">
+        <div className="details-card">
+          <img src={pet.image} alt={pet.name} className="details-media" />
+          <div className="details-body">
+            <h1 className="details-title">{pet.name}</h1>
+            <div className="details-meta">
+              {pet.species} • {pet.breed} • {pet.age} yrs • {pet.gender} •{" "}
+              {pet.size}
+            </div>
+            <div className="details-meta">City: {pet.city}</div>
+            <div className="details-meta">
+              {pet.vaccinated ? "Vaccinated" : "Not vaccinated"} •{" "}
+              {pet.neutered ? "Neutered" : "Not neutered"}
+            </div>
+            <p style={{ whiteSpace: "pre-wrap" }}>{pet.description}</p>
+            {role === "regular" && (
+              <button className="fav-btn" onClick={toggleFavorite}>
+                Add/Remove Favorite
+              </button>
+            )}
+          </div>
+        </div>
 
-      {user && (
-        <button onClick={toggleFavorite}>
-          {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-        </button>
-      )}
+        <div className="details-panel">
+          <div
+            className={`badge badge--${pet.status}`}
+            style={{ width: "max-content" }}
+          >
+            {pet.status}
+          </div>
+          <div>
+            <strong>Contact:</strong> {pet.contactName}
+          </div>
+          <div>{pet.contactPhone}</div>
+          <div>{pet.contactEmail}</div>
+          <div>
+            <strong>Shelter:</strong> {pet.createdBy?.name || "Shelter"}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
-
-export default PetDetails;

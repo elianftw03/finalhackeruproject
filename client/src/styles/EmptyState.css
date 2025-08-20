@@ -1,0 +1,39 @@
+.empty {
+  max-width: 900px;
+  margin: 32px auto;
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--muted);
+}
+.empty-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  padding: 28px 20px;
+}
+.empty h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: var(--text-color);
+}
+.empty p {
+  margin: 0 0 16px;
+}
+.empty .actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.empty .btn {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.empty .btn-primary {
+  background: var(--primary);
+  color: var(--primary-contrast);
+  border-color: var(--primary);
+}

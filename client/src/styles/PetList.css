@@ -1,0 +1,29 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.container h2 {
+  font-size: 26px;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 680px) {
+  .grid-cards {
+    grid-template-columns: 1fr;
+  }
+}

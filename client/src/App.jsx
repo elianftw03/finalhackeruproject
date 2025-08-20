@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -10,55 +10,58 @@ import AddPet from "./pages/AddPet";
 import MyPets from "./pages/MyPets";
 import Favorites from "./pages/Favorites";
 import About from "./pages/About";
+import EditPet from "./pages/EditPet";
 import ProtectedRoute from "./components/ProtectedRoute";
-import BusinessDashboard from "./pages/BusinessDashboard";
+import "./styles/layout.css";
 
 function App() {
   return (
-    <Router>
+    <div className="app">
       <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/pets" element={<PetList />} />
-        <Route path="/pets/:id" element={<PetDetails />} />
-        <Route
-          path="/add-pet"
-          element={
-            <ProtectedRoute allowedRoles={["shelter", "admin"]}>
-              <AddPet />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/my-pets"
-          element={
-            <ProtectedRoute allowedRoles={["shelter", "admin"]}>
-              <MyPets />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/favorites"
-          element={
-            <ProtectedRoute allowedRoles={["regular", "shelter", "admin"]}>
-              <Favorites />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["shelter", "admin"]}>
-              <BusinessDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/about" element={<About />} />
-      </Routes>
+      <main className="main">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/pets" element={<PetList />} />
+          <Route path="/pets/:id" element={<PetDetails />} />
+          <Route
+            path="/pets/:id/edit"
+            element={
+              <ProtectedRoute allowedRoles={["shelter", "admin"]}>
+                <EditPet />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/add-pet"
+            element={
+              <ProtectedRoute allowedRoles={["shelter", "admin"]}>
+                <AddPet />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-pets"
+            element={
+              <ProtectedRoute allowedRoles={["shelter", "admin"]}>
+                <MyPets />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/favorites"
+            element={
+              <ProtectedRoute allowedRoles={["regular", "shelter", "admin"]}>
+                <Favorites />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </main>
       <Footer />
-    </Router>
+    </div>
   );
 }
 

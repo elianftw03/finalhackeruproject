@@ -1,53 +1,78 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "../api/axiosInstance";
-import PetCard from "../components/PetCard";
+import { useToast } from "../components/Toast";
+import "../styles/Favorites.css";
+import "../styles/EmptyState.css";
 
 export default function Favorites() {
   const [pets, setPets] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  async function load() {
-    try {
-      setLoading(true);
-      const res = await axios.get("/pets/favorites");
-      const data = Array.isArray(res.data)
-        ? res.data.map((p) => ({ ...p, _isFav: true }))
-        : [];
-      setPets(data);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const { toast } = useToast();
 
   useEffect(() => {
-    load();
+    const run = async () => {
+      const { data } = await axios.get("/pets/favorites");
+      setPets(data);
+    };
+    run();
   }, []);
 
-  function handleFavoriteChanged(id, isFav) {
-    if (!isFav) setPets((prev) => prev.filter((p) => p._id !== id));
+  const toggle = async (id) => {
+    try {
+      await axios.patch(`/pets/${id}/favorite`);
+      setPets((p) => p.filter((x) => x._id !== id));
+      toast("Removed from favorites");
+    } catch {
+      toast("Failed to update favorites", "err");
+    }
+  };
+
+  if (pets.length === 0) {
+    return (
+      <div className="empty">
+        <div className="empty-card">
+          <h3>No favorites yet</h3>
+          <p>Tap the heart on a pet to save it here.</p>
+          <div className="actions">
+            <Link to="/pets" className="btn">
+              Browse pets
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  if (loading) return <div style={{ padding: 16 }}>Loading...</div>;
-  if (!pets.length)
-    return <div style={{ padding: 16 }}>You have no favorite pets yet.</div>;
-
   return (
-    <div style={{ padding: 16 }}>
-      <h2>My Favorites</h2>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
-          gap: "1rem",
-          marginTop: 12,
-        }}
-      >
+    <div className="favs-wrap">
+      <h2 className="favs-title">Favorites</h2>
+      <div className="favs-grid">
         {pets.map((pet) => (
-          <PetCard
-            key={pet._id}
-            pet={pet}
-            onFavoriteChanged={handleFavoriteChanged}
-          />
+          <div key={pet._id} className="fav-card">
+            <img src={pet.image} alt={pet.name} className="fav-media" />
+            <div className="fav-body">
+              <div className="fav-row">
+                <strong>{pet.name}</strong>
+                <span className={`badge badge--${pet.status}`}>
+                  {pet.status}
+                </span>
+              </div>
+              <div style={{ color: "var(--muted)", fontSize: 14 }}>
+                {pet.species} · {pet.age} yrs · {pet.breed || "Unknown"}
+              </div>
+              <div className="fav-actions">
+                <Link to={`/pets/${pet._id}`} className="btn btn-icon">
+                  View
+                </Link>
+                <button
+                  className="btn btn-icon"
+                  onClick={() => toggle(pet._id)}
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </div>

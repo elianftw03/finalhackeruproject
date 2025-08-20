@@ -1,70 +1,82 @@
 import { useState } from "react";
 import axios from "../api/axiosInstance";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "../components/Toast";
+import "../styles/forms.css";
 
-function Register() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("regular");
+export default function Register() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "regular",
+  });
   const [error, setError] = useState("");
-  const navigate = useNavigate();
   const { login } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSubmit = async (e) => {
+  const onChange = (e) =>
+    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+
+  const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/auth/register", {
-        name,
-        email,
-        password,
-        role,
-      });
-      login(res.data.user, res.data.token);
+      const { data } = await axios.post("/auth/register", form);
+      login(data);
+      toast("Account created");
       navigate("/");
-    } catch (err) {
-      setError("Registration failed. Please try again.");
+    } catch {
+      setError("Registration failed");
+      toast("Registration failed", "err");
     }
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Full name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          type="email"
-          placeholder="Email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <input
-          name="location"
-          placeholder="Shelter Location"
-          value={form.location}
-          onChange={handleChange}
-        />
-        <select value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="regular">Regular</option>
-          <option value="shelter">Shelter</option>
-        </select>
-        <button type="submit">Create Account</button>
-      </form>
-      {error && <p>{error}</p>}
+    <div className="form-wrap">
+      <div className="form-card">
+        <h2 className="form-title">Create Account</h2>
+        <form onSubmit={onSubmit} className="form-grid">
+          <input
+            className="input"
+            name="name"
+            placeholder="Name"
+            value={form.name}
+            onChange={onChange}
+          />
+          <select
+            className="select"
+            name="role"
+            value={form.role}
+            onChange={onChange}
+          >
+            <option value="regular">Regular</option>
+            <option value="shelter">Shelter</option>
+          </select>
+          <input
+            className="input"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={onChange}
+          />
+          <input
+            className="input"
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={onChange}
+          />
+          {error && <div className="form-error">{error}</div>}
+          <div className="form-actions">
+            <button className="btn btn-primary" type="submit">
+              Register
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
-
-export default Register;

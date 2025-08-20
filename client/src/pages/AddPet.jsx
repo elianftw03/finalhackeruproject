@@ -1,90 +1,194 @@
 import { useState } from "react";
 import axios from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import "../styles/AddPet.css";
+import { useToast } from "../components/Toast";
+import "../styles/forms.css";
 
-function AddPet() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+export default function AddPet() {
   const [form, setForm] = useState({
     name: "",
-    species: "",
-    age: "",
+    species: "Dog",
     breed: "",
-    description: "",
+    age: 0,
+    gender: "Male",
+    size: "Medium",
     image: "",
+    description: "",
+    city: "",
+    status: "available",
+    vaccinated: false,
+    neutered: false,
+    contactName: "",
+    contactPhone: "",
+    contactEmail: "",
   });
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const onChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
   };
 
-  const handleSubmit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     try {
       await axios.post("/pets", form);
-      navigate("/pets");
-    } catch (err) {
-      setError("Failed to add pet.");
+      toast("Pet created");
+      navigate("/my-pets");
+    } catch {
+      setError("Failed to create pet");
+      toast("Failed to create pet", "err");
     }
   };
 
   return (
-    <div className="add-pet-container">
-      <h2>Add a New Pet</h2>
-      <form className="add-pet-form" onSubmit={handleSubmit}>
-        <input
-          className="input-field"
-          name="name"
-          placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-        />
-        <input
-          className="input-field"
-          name="species"
-          placeholder="Species (Dog, Cat...)"
-          value={form.species}
-          onChange={handleChange}
-        />
-        <input
-          className="input-field"
-          name="breed"
-          placeholder="Breed"
-          value={form.breed}
-          onChange={handleChange}
-        />
-        <input
-          className="input-field"
-          name="age"
-          type="number"
-          placeholder="Age (in years)"
-          value={form.age}
-          onChange={handleChange}
-        />
-        <input
-          className="input-field"
-          name="image"
-          placeholder="Image URL"
-          value={form.image}
-          onChange={handleChange}
-        />
-        <textarea
-          className="textarea-field"
-          name="description"
-          placeholder="Description"
-          value={form.description}
-          onChange={handleChange}
-        />
-        <button className="submit-button" type="submit">
-          Add Pet
-        </button>
-      </form>
-      {error && <p className="error-message">{error}</p>}
+    <div className="form-wrap">
+      <div className="form-card">
+        <h2 className="form-title">Add Pet</h2>
+        <form onSubmit={onSubmit} className="form-grid">
+          <input
+            className="input"
+            name="name"
+            placeholder="Name"
+            value={form.name}
+            onChange={onChange}
+          />
+          <input
+            className="input"
+            name="breed"
+            placeholder="Breed"
+            value={form.breed}
+            onChange={onChange}
+          />
+          <select
+            className="select"
+            name="species"
+            value={form.species}
+            onChange={onChange}
+          >
+            <option>Dog</option>
+            <option>Cat</option>
+            <option>Rabbit</option>
+            <option>Bird</option>
+            <option>Horse</option>
+            <option>Reptile</option>
+          </select>
+          <input
+            className="input"
+            type="number"
+            name="age"
+            placeholder="Age"
+            value={form.age}
+            onChange={onChange}
+          />
+          <select
+            className="select"
+            name="gender"
+            value={form.gender}
+            onChange={onChange}
+          >
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+          <select
+            className="select"
+            name="size"
+            value={form.size}
+            onChange={onChange}
+          >
+            <option>Small</option>
+            <option>Medium</option>
+            <option>Large</option>
+          </select>
+          <input
+            className="input"
+            name="city"
+            placeholder="City"
+            value={form.city}
+            onChange={onChange}
+          />
+          <select
+            className="select"
+            name="status"
+            value={form.status}
+            onChange={onChange}
+          >
+            <option value="available">available</option>
+            <option value="pending">pending</option>
+            <option value="adopted">adopted</option>
+          </select>
+          <input
+            className="input"
+            name="image"
+            placeholder="Image URL"
+            value={form.image}
+            onChange={onChange}
+          />
+          <div className="form-grid full">
+            <textarea
+              className="textarea"
+              name="description"
+              placeholder="Description"
+              value={form.description}
+              onChange={onChange}
+            />
+          </div>
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              name="vaccinated"
+              checked={form.vaccinated}
+              onChange={onChange}
+            />
+            Vaccinated
+          </label>
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              name="neutered"
+              checked={form.neutered}
+              onChange={onChange}
+            />
+            Neutered
+          </label>
+          <input
+            className="input"
+            name="contactName"
+            placeholder="Contact Name"
+            value={form.contactName}
+            onChange={onChange}
+          />
+          <input
+            className="input"
+            name="contactPhone"
+            placeholder="Contact Phone"
+            value={form.contactPhone}
+            onChange={onChange}
+          />
+          <input
+            className="input"
+            name="contactEmail"
+            placeholder="Contact Email"
+            value={form.contactEmail}
+            onChange={onChange}
+          />
+          {error && <div className="form-error">{error}</div>}
+          <div className="form-actions">
+            <button className="btn btn-primary" type="submit">
+              Create
+            </button>
+            <button
+              className="btn btn-outline"
+              type="button"
+              onClick={() => navigate("/my-pets")}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
-
-export default AddPet;

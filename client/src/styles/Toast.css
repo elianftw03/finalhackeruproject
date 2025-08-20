@@ -1,0 +1,28 @@
+.toast-wrap {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+}
+.toast {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-color);
+  padding: 10px 14px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+  min-width: 200px;
+  text-align: center;
+}
+.toast.ok {
+  border-color: color-mix(in oklab, var(--border), var(--success) 30%);
+}
+.toast.err {
+  border-color: color-mix(in oklab, var(--border), var(--danger) 30%);
+  color: var(--danger);
+}

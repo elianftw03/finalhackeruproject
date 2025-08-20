@@ -80,38 +80,55 @@ exports.create = async (req, res) => {
   try {
     const newPet = {
       name: req.body.name,
-      species: normalizeSpecies(req.body.species),
+      species: req.body.species,
       breed: req.body.breed,
       age: req.body.age,
+      gender: req.body.gender,
+      size: req.body.size,
       image: req.body.image,
       description: req.body.description,
+      city: req.body.city,
+      status: req.body.status,
+      vaccinated: req.body.vaccinated,
+      neutered: req.body.neutered,
+      contactName: req.body.contactName,
+      contactPhone: req.body.contactPhone,
+      contactEmail: req.body.contactEmail,
       createdBy: req.user.id,
     };
     const pet = await Pet.create(newPet);
     res.status(201).json(pet);
-  } catch {
+  } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
 
 exports.update = async (req, res) => {
   try {
-    const body = { ...req.body };
-    if (body.species) body.species = normalizeSpecies(body.species);
-    const updated = await Pet.findByIdAndUpdate(req.params.id, body, {
+    const pet = await Pet.findById(req.params.id);
+    if (!pet) return res.status(404).json({ message: "Not found" });
+    const isOwner = pet.createdBy?.toString() === req.user.id;
+    const isAdmin = req.user.role === "admin";
+    if (!isOwner && !isAdmin) return res.sendStatus(403);
+    const updated = await Pet.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
     res.json(updated);
-  } catch {
+  } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
 
 exports.remove = async (req, res) => {
   try {
+    const pet = await Pet.findById(req.params.id);
+    if (!pet) return res.status(404).json({ message: "Not found" });
+    const isOwner = pet.createdBy?.toString() === req.user.id;
+    const isAdmin = req.user.role === "admin";
+    if (!isOwner && !isAdmin) return res.sendStatus(403);
     await Pet.findByIdAndDelete(req.params.id);
     res.sendStatus(204);
-  } catch {
+  } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -122,5 +139,32 @@ exports.getFavorites = async (req, res) => {
     res.json(user.favorites);
   } catch {
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getOne = async (req, res) => {
+  try {
+    const pet = await Pet.findById(req.params.id).populate(
+      "createdBy",
+      "name location email"
+    );
+    if (!pet) return res.status(404).json({ message: "Not found" });
+    res.json(pet);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.patch = async (req, res) => {
+  try {
+    const updated = await Pet.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ message: "Pet not found" });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ message: err.message || "Patch failed" });
   }
 };

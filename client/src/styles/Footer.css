@@ -1,9 +1,22 @@
-footer {
-  margin-top: auto;
-  padding: 1rem;
-  border-top: 1px solid #ccc;
-  text-align: center;
-  color: white;
-  background-color: gray;
-  width: 100%;
+.footer {
+  border-top: 1px solid var(--border);
+  background-color: var(--primary);
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--bg);
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .footer-inner {
+    flex-direction: column;
+    gap: 8px;
+  }
 }

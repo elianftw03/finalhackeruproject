@@ -1,77 +1,73 @@
 import { useState } from "react";
 import axios from "../api/axiosInstance";
-import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
-import "../styles/forms.css";
+import "../styles/Auth.css";
 
-export default function Register() {
+function Register() {
+  const { toast } = useToast();
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
     role: "regular",
   });
-  const [error, setError] = useState("");
-  const { login } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const onChange = (e) =>
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post("/auth/register", form);
-      login(data);
-      toast("Account created");
-      navigate("/");
+      await axios.post("/auth/register", form);
+      toast("Registered successfully");
+      setForm({ name: "", email: "", password: "", role: "regular" });
     } catch {
-      setError("Registration failed");
-      toast("Registration failed", "err");
+      toast("Registration failed");
     }
   };
 
   return (
-    <div className="form-wrap">
-      <div className="form-card">
-        <h2 className="form-title">Create Account</h2>
-        <form onSubmit={onSubmit} className="form-grid">
-          <input
-            className="input"
-            name="name"
-            placeholder="Name"
-            value={form.name}
-            onChange={onChange}
-          />
-          <select
-            className="select"
-            name="role"
-            value={form.role}
-            onChange={onChange}
-          >
-            <option value="regular">Regular</option>
-            <option value="shelter">Shelter</option>
-          </select>
-          <input
-            className="input"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={onChange}
-          />
-          <input
-            className="input"
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={onChange}
-          />
-          {error && <div className="form-error">{error}</div>}
-          <div className="form-actions">
-            <button className="btn btn-primary" type="submit">
+    <div className="auth-wrap">
+      <div className="auth-card">
+        <h2 className="auth-title">Create Account</h2>
+        <form onSubmit={onSubmit} className="auth-grid">
+          <div className="auth-row">
+            <input
+              name="name"
+              placeholder="Name"
+              value={form.name}
+              onChange={onChange}
+            />
+          </div>
+          <div className="auth-row">
+            <select name="role" value={form.role} onChange={onChange}>
+              <option value="regular">Regular</option>
+              <option value="shelter">Shelter</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div className="auth-row">
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={onChange}
+            />
+          </div>
+          <div className="auth-row">
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={onChange}
+            />
+          </div>
+          <div className="auth-actions">
+            <button type="submit" className="btn-primary">
               Register
             </button>
           </div>
@@ -80,3 +76,5 @@ export default function Register() {
     </div>
   );
 }
+
+export default Register;

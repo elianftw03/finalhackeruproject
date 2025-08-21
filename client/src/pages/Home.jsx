@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import "../styles/Home.css";
 import DogsImg from "../assets/Dogs.avif";
 import CatsImg from "../assets/Cats.webp";
@@ -8,15 +9,27 @@ import HorsesImg from "../assets/Horses.png";
 import ReptilesImg from "../assets/Reptiles.jpg";
 
 const petTypes = [
-  { name: "Dogs", image: DogsImg },
-  { name: "Cats", image: CatsImg },
-  { name: "Rabbits", image: RabbitsImg },
-  { name: "Birds", image: BirdsImg },
-  { name: "Horses", image: HorsesImg },
-  { name: "Reptiles", image: ReptilesImg },
+  { label: "Dogs", value: "Dog", image: DogsImg },
+  { label: "Cats", value: "Cat", image: CatsImg },
+  { label: "Rabbits", value: "Rabbit", image: RabbitsImg },
+  { label: "Birds", value: "Bird", image: BirdsImg },
+  { label: "Horses", value: "Horse", image: HorsesImg },
+  { label: "Reptiles", value: "Reptile", image: ReptilesImg },
 ];
 
 function Home() {
+  const navigate = useNavigate();
+  const [term, setTerm] = useState("");
+  const [species, setSpecies] = useState(petTypes[0].value);
+
+  const onSearch = () => {
+    const q = term.trim();
+    const params = new URLSearchParams();
+    if (species) params.set("species", species);
+    if (q) params.set("q", q);
+    navigate(`/pets?${params.toString()}`);
+  };
+
   return (
     <div className="home-wrapper">
       <div className="main-content">
@@ -26,13 +39,23 @@ function Home() {
               <h1>Find your new best friend</h1>
               <p>Search adoptable pets from shelters across the country</p>
               <div className="search-bar">
-                <input type="text" placeholder="Enter a city, state or zip" />
-                <select>
-                  {petTypes.map((pet) => (
-                    <option key={pet.name}>{pet.name}</option>
+                <input
+                  type="text"
+                  placeholder="Enter a city, breed or name"
+                  value={term}
+                  onChange={(e) => setTerm(e.target.value)}
+                />
+                <select
+                  value={species}
+                  onChange={(e) => setSpecies(e.target.value)}
+                >
+                  {petTypes.map((p) => (
+                    <option key={p.value} value={p.value}>
+                      {p.label}
+                    </option>
                   ))}
                 </select>
-                <button>Search</button>
+                <button onClick={onSearch}>Search</button>
               </div>
             </div>
           </div>
@@ -43,12 +66,12 @@ function Home() {
           <div className="category-grid">
             {petTypes.map((pet) => (
               <Link
-                key={pet.name}
-                to={`/pets?species=${encodeURIComponent(pet.name)}`}
                 className="category-card"
+                key={pet.value}
+                to={`/pets?species=${encodeURIComponent(pet.value)}`}
               >
-                <img src={pet.image} alt={pet.name} />
-                <p>{pet.name}</p>
+                <img src={pet.image} alt={pet.label} />
+                <p>{pet.label}</p>
               </Link>
             ))}
           </div>

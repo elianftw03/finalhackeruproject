@@ -31,26 +31,32 @@ exports.toggleFavorite = async (req, res) => {
 
 exports.getAll = async (req, res) => {
   try {
-    const q = (req.query.q || "").trim();
-    const type = normalizeSpecies((req.query.type || "").trim());
-    const where = {};
-    if (type) where.species = type;
-    if (q) {
-      const rx = { $regex: q, $options: "i" };
-      where.$or = [
-        { name: rx },
-        { species: rx },
-        { breed: rx },
-        { description: rx },
-        { "address.city": rx },
+    const { species, type, q } = req.query;
+    const filter = {};
+
+    const raw = (species || type || "").trim();
+    if (raw) {
+      const normalized = raw.replace(/s$/i, "");
+      filter.species = new RegExp(`^${normalized}$`, "i");
+    }
+
+    if (q && q.trim()) {
+      const re = new RegExp(q.trim(), "i");
+      filter.$or = [
+        { name: re },
+        { breed: re },
+        { city: re },
+        { description: re },
       ];
     }
-    const pets = await Pet.find(where)
-      .limit(30)
+
+    const pets = await Pet.find(filter)
       .sort({ createdAt: -1 })
+      .limit(30)
       .populate("createdBy", "name location");
+
     res.json(pets);
-  } catch {
+  } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };

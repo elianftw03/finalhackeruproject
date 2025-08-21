@@ -1,57 +1,75 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "../api/axiosInstance";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
-import "../styles/forms.css";
+import "../styles/Auth.css";
 
-export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+function Login() {
   const { login } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
-  const onChange = (e) =>
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const { data } = await axios.post("/auth/login", form);
-      login(data);
-      toast("Welcome back");
+      const res = await axios.post("/auth/login", form);
+      const token = res?.data?.token;
+      const user = res?.data?.user;
+      if (!token || !user) {
+        toast("Login failed");
+        return;
+      }
+      login(token, user);
+      toast("Logged in");
       navigate("/");
-    } catch {
-      setError("Login failed");
-      toast("Login failed", "err");
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message || err?.message || "Login failed";
+      toast(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="form-wrap">
-      <div className="form-card">
-        <h2 className="form-title">Login</h2>
-        <form onSubmit={onSubmit} className="form-grid full">
-          <input
-            className="input"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={onChange}
-          />
-          <input
-            className="input"
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={onChange}
-          />
-          {error && <div className="form-error">{error}</div>}
-          <div className="form-actions">
-            <button className="btn btn-primary" type="submit">
-              Login
+    <div className="auth-wrap">
+      <div className="auth-card">
+        <h2 className="auth-title">Login</h2>
+        <form onSubmit={onSubmit} className="auth-grid">
+          <div className="auth-row">
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={onChange}
+              autoComplete="email"
+              required
+            />
+          </div>
+          <div className="auth-row">
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={onChange}
+              autoComplete="current-password"
+              required
+            />
+          </div>
+          <div className="auth-actions">
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? "..." : "Login"}
             </button>
           </div>
         </form>
@@ -59,3 +77,5 @@ export default function Login() {
     </div>
   );
 }
+
+export default Login;
